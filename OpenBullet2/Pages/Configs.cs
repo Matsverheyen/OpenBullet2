@@ -207,14 +207,50 @@ namespace OpenBullet2.Pages
             {
                 ConfigSection.Metadata => "config/edit/metadata",
                 ConfigSection.Readme => "config/edit/readme",
-                ConfigSection.Stacker => selectedConfig.Mode == ConfigMode.CSharp ? "config/edit/code" : "config/edit/stacker",
-                ConfigSection.LoliCode => selectedConfig.Mode == ConfigMode.CSharp ? "config/edit/code" : "config/edit/lolicode",
+                ConfigSection.Stacker => GetStackerRedirection(),
+                ConfigSection.LoliCode => GetLoliCodeRedirection(),
                 ConfigSection.Settings => "config/edit/settings",
-                ConfigSection.CSharpCode => "config/edit/code",
+                ConfigSection.CSharpCode => GetCSharpCodeRedirection(),
                 _ => throw new NotImplementedException()
             };
 
             Nav.NavigateTo(uri);
+        }
+
+        private string GetStackerRedirection()
+        {
+            return selectedConfig.Mode switch
+            {
+                ConfigMode.Stack => "config/edit/stacker",
+                ConfigMode.LoliCode => "config/edit/stacker",
+                ConfigMode.CSharp => "config/edit/code",
+                ConfigMode.Dll => "config/edit/metadata",
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        private string GetLoliCodeRedirection()
+        {
+            return selectedConfig.Mode switch
+            {
+                ConfigMode.Stack => "config/edit/lolicode",
+                ConfigMode.LoliCode => "config/edit/lolicode",
+                ConfigMode.CSharp => "config/edit/code",
+                ConfigMode.Dll => "config/edit/metadata",
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        private string GetCSharpCodeRedirection()
+        {
+            return selectedConfig.Mode switch
+            {
+                ConfigMode.Stack => "config/edit/code",
+                ConfigMode.LoliCode => "config/edit/code",
+                ConfigMode.CSharp => "config/edit/code",
+                ConfigMode.Dll => "config/edit/metadata",
+                _ => throw new NotImplementedException()
+            };
         }
 
         private async Task ProcessUploadedConfigs(InputFileChangeEventArgs e)

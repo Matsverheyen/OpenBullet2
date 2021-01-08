@@ -84,8 +84,8 @@ namespace OpenBullet2.Repositories
             // Update the last modified date
             config.Metadata.LastModified = DateTime.Now;
 
-            // If not a csharp config, try to build the stack to get required plugins
-            if (config.Mode != ConfigMode.CSharp)
+            // If not a csharp or dll config, try to build the stack to get required plugins
+            if (config.Mode != ConfigMode.CSharp && config.Mode != ConfigMode.Dll)
             {
                 try
                 {

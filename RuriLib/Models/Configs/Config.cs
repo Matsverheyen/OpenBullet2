@@ -23,6 +23,7 @@ namespace RuriLib.Models.Configs
         public List<BlockInstance> Stack { get; set; } = new List<BlockInstance>();
         public string LoliCodeScript { get; set; } = "";
         public string CSharpScript { get; set; } = "";
+        public byte[] Assembly { get; set; } = Array.Empty<byte>();
 
         // Hashes used to check if the config was saved
         private string loliCodeHash;
@@ -70,6 +71,7 @@ namespace RuriLib.Models.Configs
             {
                 return Mode switch
                 {
+                    ConfigMode.Dll => true,
                     ConfigMode.CSharp => true,
                     ConfigMode.Stack => Stack.Any(b => (b is LoliCodeBlockInstance || b is ScriptBlockInstance)),
                     ConfigMode.LoliCode => new Loli2StackTranspiler().Transpile(LoliCodeScript)
@@ -79,8 +81,8 @@ namespace RuriLib.Models.Configs
             }
             catch
             {
-                // We don't know, return false just to be safe
-                return false;
+                // We don't know, return true just to be safe
+                return true;
             }
         }
 
@@ -99,9 +101,14 @@ namespace RuriLib.Models.Configs
         /// the last call of <see cref="UpdateHashes"/>.
         /// </summary>
         public bool HasUnsavedChanges()
-            => Mode == ConfigMode.CSharp
+        {
+            if (Mode == ConfigMode.Dll)
+                return false;
+
+             return Mode == ConfigMode.CSharp
                 ? GetHash(CSharpScript + JsonConvert.SerializeObject(Settings)) != cSharpHash
                 : GetHash(LoliCodeScript + JsonConvert.SerializeObject(Settings)) != loliCodeHash;
+        }
 
         private static string GetHash(string str)
             => HexConverter.ToHexString(Crypto.SHA1(Encoding.UTF8.GetBytes(str)));

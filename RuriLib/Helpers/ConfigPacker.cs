@@ -43,6 +43,10 @@ namespace RuriLib.Helpers
                         await CreateZipEntryFromString(archive, "script.cs", config.CSharpScript);
                         break;
 
+                    case ConfigMode.Dll:
+                        await CreateZipEntryFromBytes(archive, "assembly.dll", config.Assembly);
+                        break;
+
                     default:
                         throw new NotSupportedException();
                 }
@@ -70,6 +74,11 @@ namespace RuriLib.Helpers
                     config.CSharpScript = ReadStringFromZipEntry(archive, "script.cs");
                     config.Mode = ConfigMode.CSharp;
                 }
+                else if (archive.Entries.Any(e => e.Name.Contains("assembly.dll")))
+                {
+                    config.Assembly = ReadBytesFromZipEntry(archive, "assembly.dll");
+                    config.Mode = ConfigMode.Dll;
+                }
                 else
                 {
                     config.LoliCodeScript = ReadStringFromZipEntry(archive, "script.loli");
@@ -82,10 +91,13 @@ namespace RuriLib.Helpers
         }
 
         private static async Task CreateZipEntryFromString(ZipArchive archive, string path, string content)
+            => await CreateZipEntryFromBytes(archive, path, Encoding.UTF8.GetBytes(content));
+
+        private static async Task CreateZipEntryFromBytes(ZipArchive archive, string path, byte[] content)
         {
             var zipFile = archive.CreateEntry(path);
 
-            using var sourceFileStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+            using var sourceFileStream = new MemoryStream(content);
             using var zipEntryStream = zipFile.Open();
             await sourceFileStream.CopyToAsync(zipEntryStream);
         }
